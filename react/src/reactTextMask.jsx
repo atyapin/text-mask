@@ -21,11 +21,42 @@ export const MaskedInput = React.createClass({
       validator
     } = this.props
 
+    this.conformedInput = ''
+    this.adjustedCaretPosition = 0
+
     return getComponentInitialState({inputValue, mask, validator, guide, placeholderChar})
   },
 
   componentDidUpdate() {
     safeSetSelection(this.inputElement, this.adjustedCaretPosition)
+  },
+
+  componentWillUpdate() {
+    const {props, onChange, state: {componentPlaceholder, value: stateValue}, conformedInput: previousConformedInput} = this
+    const {
+      placeholder = componentPlaceholder,
+      type = 'text',
+      value = '',
+      mask,
+      validator,
+      guide,
+      placeholderCharacter: placeholderChar
+    } = props
+
+    const {conformedInput, adjustedCaretPosition} = processComponentChanges({
+      userInput: value || stateValue,
+      placeholder: componentPlaceholder,
+      previousConformedInput,
+      mask,
+      validator,
+      guide,
+      placeholderChar,
+      currentCaretPosition: (this.inputElement !== undefined) ? this.inputElement.selectionStart : 0
+    })
+
+    this.conformedInput = conformedInput
+    this.adjustedCaretPosition = adjustedCaretPosition
+
   },
 
   render() {
@@ -39,26 +70,28 @@ export const MaskedInput = React.createClass({
       guide,
       placeholderCharacter: placeholderChar
     } = props
-    const {conformedInput, adjustedCaretPosition} = processComponentChanges({
-      userInput: value || stateValue,
-      placeholder: componentPlaceholder,
-      previousConformedInput,
-      mask,
-      validator,
-      guide,
-      placeholderChar,
-      currentCaretPosition: (this.inputElement !== undefined) ? this.inputElement.selectionStart : 0
-    })
+    // const {conformedInput, adjustedCaretPosition} = processComponentChanges({
+    //   userInput: value || stateValue,
+    //   placeholder: componentPlaceholder,
+    //   previousConformedInput,
+    //   mask,
+    //   validator,
+    //   guide,
+    //   placeholderChar,
+    //   currentCaretPosition: (this.inputElement !== undefined) ? this.inputElement.selectionStart : 0
+    // })
 
-    this.adjustedCaretPosition = adjustedCaretPosition
-    this.conformedInput = conformedInput
+
+    // this.adjustedCaretPosition = adjustedCaretPosition
+    // console.log('conformedInput', conformedInput)
+    // this.conformedInput = conformedInput
 
     return (
       <input
         {...props}
         type={type}
         onChange={onChange}
-        value={conformedInput}
+        value={this.conformedInput}
         placeholder={placeholder}
         ref={inputElement => (this.inputElement = inputElement)}
       />
@@ -93,6 +126,9 @@ export const MaskedInput = React.createClass({
     //
     // event.target.value = conformedInput
     //
+
+    console.log('this.conformedInput', this.conformedInput)
+    console.log('event.target.value', event.target.value)
 
     if (typeof this.props.value !== 'string') {
       this.setState({value: event.target.value})
