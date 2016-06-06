@@ -24,7 +24,7 @@ export function processComponentChanges({
     currentCaretPosition,
     placeholderChar
   })
-  const valueShouldBeEmpty = outputOfConformToMask === placeholder && adjustedCaretPosition === 0
+  const valueShouldBeEmpty = adjustedCaretPosition === 0 && userInput === ''
   const conformedInput = (valueShouldBeEmpty) ? '' : outputOfConformToMask
 
   return {conformedInput, adjustedCaretPosition}
