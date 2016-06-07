@@ -58,7 +58,7 @@ export function getSafeInputValueType(inputValue) {
   } else {
     throw new Error(
       `Text Mask received '${JSON.stringify(inputValue)}' as a value. Please set value to ` +
-      `either a string or a number.`
+      'either a string or a number.'
     )
   }
 }
