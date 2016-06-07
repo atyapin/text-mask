@@ -3,7 +3,7 @@ import {
   processComponentChanges,
   safeSetSelection,
   getComponentInitialState
-} from '../../core/src/componentHelpers.js'
+} from '../../core/src/reactComponentHelpers.js'
 
 export const MaskedInput = React.createClass({
   propTypes: {
