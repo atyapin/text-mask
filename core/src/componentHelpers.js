@@ -4,7 +4,7 @@ import {convertMaskToPlaceholder, isString, isNumber} from './utilities.js'
 
 export function processComponentChanges({
   userInput = '',
-  placeholder = '',
+  componentPlaceholder = '',
   previousConformedInput = '',
   mask = '',
   guide = '',
@@ -24,22 +24,20 @@ export function processComponentChanges({
     currentCaretPosition,
     placeholderChar
   })
-  const valueShouldBeEmpty = adjustedCaretPosition === 0 && userInput === ''
+  const valueShouldBeEmpty = adjustedCaretPosition === 0 && (
+    userInput === '' ||
+    outputOfConformToMask === componentPlaceholder
+  )
   const conformedInput = (valueShouldBeEmpty) ? '' : outputOfConformToMask
 
   return {conformedInput, adjustedCaretPosition}
 }
 
-export function getComponentInitialState({inputValue, mask, validator, guide, placeholderChar}) {
-  const safeInputValue = getSafeInputValue(inputValue)
-  const needsToBeConformed = safeInputValue.length > 0
-  const conformToMaskConfig = {validator, guide, previousConformedInput: '', placeholderChar}
-  const {output: conformedInput} = (needsToBeConformed) ?
-    conformToMask(safeInputValue, mask, conformToMaskConfig) :
-    {output: ''}
+export function getComponentInitialState({inputValue, mask, placeholderChar}) {
+  checkInputValueType(inputValue)
 
   return {
-    conformedInput,
+    conformedInput: '',
     adjustedCaretPosition: 0,
     componentPlaceholder: convertMaskToPlaceholder({mask, placeholderChar})
   }
@@ -51,7 +49,7 @@ export function safeSetSelection(element, selectionPosition) {
   }
 }
 
-function getSafeInputValue(inputValue) {
+function checkInputValueType(inputValue) {
   if (isString(inputValue)) {
     return inputValue
   } else if (isNumber(inputValue)) {
