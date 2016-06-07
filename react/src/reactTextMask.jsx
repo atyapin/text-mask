@@ -2,7 +2,7 @@ import React, {PropTypes} from 'react'
 import {
   processComponentChanges,
   safeSetSelection,
-  getComponentInitialState
+  getSafeInputValueType
 } from '../../core/src/reactComponentHelpers.js'
 
 export const MaskedInput = React.createClass({
@@ -12,14 +12,19 @@ export const MaskedInput = React.createClass({
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   },
 
-  getInitialState() {
-    return {}
+  resetTextMaskState() {
+    this.textMaskState = {adjustedCaretPosition: 0, conformedInput: ''}
   },
 
-  componentWillMount() {
-    const {mask, placeholderCharacter: placeholderChar, value = ''} = this.props
+  resetState() {
+    this.resetTextMaskState()
+    this.setState({value: ''})
+  },
 
-    this.textMaskState = getComponentInitialState({value, mask, placeholderChar})
+  getInitialState() {
+    this.resetTextMaskState()
+
+    return {value: ''}
   },
 
   componentDidUpdate() {
@@ -28,7 +33,7 @@ export const MaskedInput = React.createClass({
 
   render() {
     const {
-      props,
+      props, onChange, inputElement,
       textMaskState: {conformedInput: previousConformedInput, componentPlaceholder},
       state: {value: stateValue},
       props: {
@@ -39,14 +44,11 @@ export const MaskedInput = React.createClass({
         validator,
         guide,
         placeholderChar
-      },
-      onChange
+      }
     } = this
-    const currentCaretPosition = (this.inputElement !== undefined) ?
-      this.inputElement.selectionStart :
-      0
+    const currentCaretPosition = (inputElement !== undefined) ? inputElement.selectionStart : 0
     const {conformedInput, adjustedCaretPosition} = processComponentChanges({
-      userInput: value || stateValue,
+      userInput: (value !== undefined) ? getSafeInputValueType(value) : stateValue,
       previousConformedInput,
       componentPlaceholder,
       mask,
@@ -59,8 +61,8 @@ export const MaskedInput = React.createClass({
     this.textMaskState.adjustedCaretPosition = adjustedCaretPosition
     this.textMaskState.conformedInput = conformedInput
 
-    if (this.inputElement !== undefined) {
-      this.inputElement.value = conformedInput
+    if (inputElement !== undefined) {
+      inputElement.value = conformedInput
     }
 
     return (
@@ -76,7 +78,7 @@ export const MaskedInput = React.createClass({
   },
 
   onChange(event) {
-    if (this.props.value === undefined || this.props.value === null) {
+    if (this.props.value === undefined) {
       this.setState({value: event.target.value})
     }
 
